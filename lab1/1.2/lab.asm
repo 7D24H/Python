@@ -49,14 +49,6 @@ read:	mov eax,3	;Specify sys_read call	;标准输入
 	mov [input],eax
 	jmp read	;无条件跳转，继续读入下一个字符
 
-;----------------------------
-
-;	mov eax,[input] ;被除数
-;       mov ebx,10      ;除数
-;       mov edx,0       ;初始化余数
-;       div ebx
-;       add edx,0x30    ;余数以ASCII码输出
-
 ;----------------------------------------------------------
 saveX:	mov eax,[input]
 	mov [varX],eax
@@ -68,7 +60,7 @@ saveX:	mov eax,[input]
 	;用除十取余的方法输出
 pushX:	mov eax,[varX] ;被除数
         mov ebx,10      ;除数
-        mov edx,0       ;初始化余数
+        mov rdx,0       ;初始化余数
         div ebx
         add edx,0x30    ;余数以ASCII码输出
 	mov [varX],eax	;商存回去
@@ -79,7 +71,7 @@ pushX:	mov eax,[varX] ;被除数
 	mov [pushNum],ecx
 	
 	cmp eax,0	;被除数变为0说明已经除完了
-	jmp writeX	;就要出栈输出了
+	je writeX	;就要出栈输出了
 	jmp pushX	;否则继续压栈
 
 writeX:	pop rcx
@@ -91,7 +83,7 @@ writeX:	pop rcx
 	mov eax,4
 	mov ebx,1
 	mov ecx,output
-	mov edx,1
+	mov edx,4
 	int 80h
 
 	mov ecx,[pushNum]
