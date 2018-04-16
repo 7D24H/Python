@@ -153,7 +153,7 @@ startFib:
 initialAB:
 	mov eax,[loopInitial]
 	cmp eax,0
-	je endIni
+	je exitInitial
 	
 	mov eax,[aPointer]	;继续初始化fibA
 	add eax,4		;往前走 继续初始化为0
@@ -175,12 +175,13 @@ initialAB:
 
 	jmp initialAB		;继续初始化
 
-endIni:	mov eax,fibA		;恢复fibA fibB的起始地址到aPointer bPointer中
+exitInitial:
+	mov eax,fibA		;恢复fibA fibB的起始地址到aPointer bPointer中
 	mov [aPointer],eax
 	mov ebx,fibB
 	mov [bPointer],ebx
 
-countFib:
+countFibSpecial:
 	mov eax,0
 	mov ebx,[fibN]
 	cmp ebx,eax
@@ -188,41 +189,44 @@ countFib:
 	
 	mov eax,1
 	mov ebx,[fibN]
-	cmp ebx,eax	;eax里有fibN值 和
-	je compareFib1
+	cmp ebx,eax	;
+	je compareFib1VarX
 
-	jmp exit
+	jmp countFib	;这里要改成跳到正常的;TODO;其实按道理应该都跳不回这里
 	
+countFib:
+	jmp exit
+
 compareFib0:
-	mov eax,[fibN]
+	mov eax,[fibN]	;actually fibN=0
 	mov ebx,[varX]
 	cmp eax,ebx
-	je outputFib0
-	mov eax,[fibN]
+	je outputFib0	;fibN=varX=0
+	mov eax,[fibN]	;否则fibN=fibN+1=1
 	inc eax
 	mov [fibN],eax
-	jmp countFib
+	jmp countFibSpecial	;跳回去看fib1是否要特殊输出
 
-compareFib1:
-	mov eax,[fibN]
+compareFib1VarX:
+	mov eax,[fibN]	;actually fibN=1
 	mov ebx,[varX]
 	cmp eax,ebx	;fib1>=varX
-	jge compareVarY
-	
-	mov eax,[fibN]
-	inc eax
+	jge compareFib1VarY	;满足了大于下限，再去比是否fib1<=varY
+
+	mov eax,[fibN]	;fib1<varX
+	inc eax		;fibN=fibN+1=2
 	mov [fibN],eax
-	
-	jmp countFib
-compareVarY:
-	mov eax,[fibN]
+	jmp countFib	;以fibN=2的身份跳回正常的fib计算;TODO
+
+compareFib1VarY:
+	mov eax,[fibN]	;actually fibN=1
 	mov ebx,[varY]
 	cmp eax,ebx	;fib1<=varY
 	jle outputFib1
-	jmp exit
+	jmp exit	;fib1>varY,确实该退出了没问题,不用改
 
 outputFib0:
-	mov eax,[fibN]
+	mov eax,[fibN]	;保证以fibN=1的身份跳回
 	inc eax
 	mov [fibN],eax
 
@@ -231,10 +235,10 @@ outputFib0:
 	mov ecx,zero
 	mov edx,2
 	int 80h
-	jmp countFib
+	jmp countFibSpecial	;跳回特殊值fib1的判断;	TODO
 
 outputFib1:
-	mov eax,[fibN]
+	mov eax,[fibN]	;保证以fibN=2的身份跳回
         inc eax
         mov [fibN],eax
 	
@@ -243,7 +247,7 @@ outputFib1:
 	mov ecx,one
 	mov edx,2
 	int 80h
-	jmp countFib
+	jmp countFib	;这里应该是跳回正常的fib计算;TODO
 
 exit:   mov eax,1	;Specify Exit syscall	;结束
         mov ebx,0	;Return a code of zero
