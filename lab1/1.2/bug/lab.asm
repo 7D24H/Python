@@ -299,6 +299,8 @@ loopDecimal:
 	inc ecx		;压栈次数++，出栈要用的
 	mov [pushNum],ecx
 
+;	mov ebx,[dividePointer]	;call divideByTen的时候ebx被改写到和bPointer里的一样了（这个正是返回条件），所以一定要重新装进去
+
 	mov eax,[ebx]	;[ebx]的值在loopDivideByte每个byte被除一次为得到余数的时候都被存过
 	cmp eax,0
 	je decDividePointer;如果当前byte全部被除没了（因为得到余数的过程也是位数下降的过程），就可以继续往下个byte了
