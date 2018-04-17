@@ -311,6 +311,13 @@ decDividePointer:
 	mov ecx,[bPointer]
 	cmp ebx,ecx
 	jb printFibB	;ebx已经减到比fibB区域首地址都要小了，说明已经该压的栈全压了，打印！
+
+	;;;否则当然是要减少dividePointer的值啊！
+	mov eax,[ebx]
+	cmp eax,0
+	je decDividePointer	;还要看这个byte是不是本来就是0,是的话就不用理他了，因为这个字节十怎么除都不会留余数给下一个字节用的
+
+	mov [dividePointer],ebx
 	jmp loopDecimal	;否则带着减了一的ebx回去继续战斗！	
 ;------------------------
 dividedByTen:		;ebx里有dividePointer里的值 所以不要动ebx
