@@ -87,7 +87,7 @@ startFib:
 
 	mov eax,0
 	mov [fibA],eax	;初始化fib(0)=0
-	mov ebx,0
+	mov ebx,1
 	mov [fibB],ebx	;初始化fib(1)=1
 
 	mov eax,99
