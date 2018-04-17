@@ -77,19 +77,18 @@ saveY:  mov eax,[input]
         mov eax,0
         mov [input],eax	;其实这里input的清零不是必需的
 
-	jmp startFib    ;这里开始进入fib计算
+	jmp startFib    ;这里开始进入正式的fib计算
 ;-----------------------------------------------------------
-startFib:	
-;	push rbx	;;?
+startFib:
 	mov eax,fibA
 	mov [aPointer],eax
 	mov ebx,fibB
 	mov [bPointer],ebx
 
-	mov eax,00h
+	mov eax,0
 	mov [fibA],eax	;初始化fib(0)=0
-	mov ecx,01h
-	mov [fibB],ecx	;初始化fib(1)=1
+	mov ebx,0
+	mov [fibB],ebx	;初始化fib(1)=1
 
 	mov eax,99
         mov [loopInitial],eax	;初始化循环计数器 因为可能已经被改写了
@@ -120,11 +119,10 @@ initialAB:
 	jmp initialAB		;继续初始化
 
 exitInitial:
-;	pop rbx
 	mov eax,fibA		;恢复fibA fibB的起始地址到aPointer bPointer中
 	mov [aPointer],eax
-	mov eax,fibB
-	mov [bPointer],eax
+	mov ebx,fibB
+	mov [bPointer],ebx
 
 ;-------------------------------------------------------------------------------
 
@@ -301,34 +299,17 @@ loopDecimal:
 	inc ecx		;压栈次数++，出栈要用的
 	mov [pushNum],ecx
 
-	mov ebx,[dividePointer]
-
 	mov eax,[ebx]	;[ebx]的值在loopDivideByte每个byte被除一次为得到余数的时候都被存过
 	cmp eax,0
 	je decDividePointer;如果当前byte全部被除没了（因为得到余数的过程也是位数下降的过程），就可以继续往下个byte了
-	jmp backLoopDecimal	;否则继续除这个byte
-
-backLoopDecimal:
-	mov ecx,[bPointer]
-	cmp ebx,ecx
-	jb endLoopDecimal
-	jmp loopDecimal
-
-endLoopDecimal:
-	jmp printFibB
+	jmp loopDecimal	;否则继续除这个byte
 
 decDividePointer:
 	dec ebx
 	mov ecx,[bPointer]
 	cmp ebx,ecx
-	jb endLoopDecimal	;ebx已经减到比fibB区域首地址都要小了，说明已经该压的栈全压了，打印！
-	mov eax,[ebx]
-	cmp eax,0
-	je decDividePointer
-	mov [dividePointer],ebx
-	jmp backLoopDecimal
-
-;	jmp loopDecimal	;否则带着减了一的ebx回去继续战斗！	
+	jb printFibB	;ebx已经减到比fibB区域首地址都要小了，说明已经该压的栈全压了，打印！
+	jmp loopDecimal	;否则带着减了一的ebx回去继续战斗！	
 ;------------------------
 dividedByTen:		;ebx里有dividePointer里的值 所以不要动ebx
 	mov edx,0	;余数初始化为0
@@ -337,9 +318,8 @@ loopDivideByte:
 	mov eax,edx	;edx是上一轮除剩下的余数
 	mov ecx,256
 	mul ecx		;eax里现在放着左移了8位的余数，因为它相对于这轮要除的byte来说就是比他们要大256倍，得供起来，最多挤到16位，不会溢出的放心
-	mov ecx,eax
-	
-	mov eax,[ebx]	;当前要除的byte里的值
+
+	mov ecx,[ebx]	;当前要除的byte里的值
 	add eax,ecx	;eax里放了加了上一轮余数左移8位和现在byte相加的值（类比加法还得拖家带口个进位位）
 	mov ecx,10	;ecx=10	
 	div ecx		;eax/ecx=eax......edx
@@ -381,7 +361,6 @@ endPrint:
 	mov ecx,endl
 	mov edx,2
 	int 80h
-	jmp endOutputFibB
 
 endOutputFibB:
 	mov eax,[fibN]
