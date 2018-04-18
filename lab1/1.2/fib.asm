@@ -1,7 +1,8 @@
 ;fib.asm
 
 section .data
-	
+	promptString db "Please input x and y:",0ah ;提示输入
+	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
 
 	newLine: db ' ',0Ah
 	loopInitialABNum: dd 99	;给a,b初始化时用到的循环计数器，“高高低低原则”	;;db->dd 
@@ -14,8 +15,8 @@ section .data
 	currentColor: db 0				;当前选择颜色与color首地址的偏差值
 
 ;---------------------------
-	promptString db "Please input x and y:",0ah ;提示输入
-	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
+	;promptString: db "Please input x and y:",0ah ;提示输入
+	;promptLen: equ $-promptString ;当前位置减字符串首地址即为字符长度
 	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
 
 	zero db '0',0xa
@@ -368,7 +369,7 @@ compareVarY:
 
 	binaryToDecimal:
 	;	push ebx							;ebx中的值后期有用，先把ebx的值压栈
-		push rbx
+	;	push rbx
 		mov ecx, [pushTotalNum]				;每一次转化为十进制，先把pushTotalNum的值初始化为0
 		mov ecx, 0
 		mov [pushTotalNum], ecx

@@ -1,41 +1,39 @@
 section .data
-	promptString db "Please input x and y:",0ah ;提示输入
-	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
-	endl db 0xa	;换行
-	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
-	pushNum dd 0	;压栈次数
+	
+	endl: db ' ',0xa	;换行
+	loopInitial: dd 99	;初始化fibA fibB用的循环计数器
+	loopAdd: dd 100	;fibA fibB逐个单元相加时用到的计数器
 
-	loopInitial dd 99	;初始化fibA fibB用的循环计数器
-	loopAdd dd 100	;fibA fibB逐个单元相加时用到的计数器
-
-	carryBit dd 0	;加法时用来存上一轮相加的进位的
-
+	carryBit: dd 0	;加法时用来存上一轮相加的进位的
+	pushNum: dd 0	;压栈次数
+	promptString: db "Please input x and y:",0ah ;提示输入
+	promptLen: equ $-promptString ;当前位置减字符串首地址即为字符长度
+	input: dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
 	
 
-	zero db '0',0xa
-	one db '1',0xa	
-	fibN dd 0	;计算到第几个fib值	
+	zero: db '0',0xa
+	one: db '1',0xa	
+	fibN: dd 0	;计算到第几个fib值	
 
 	color: db 27,"[1;31m",27,"[1;32m",27,"[1;33m",27,"[1;34m",27,"[1;35m",27,"[1;36m",27,"[1;37m",27,"[1;30m"       ;红绿黄蓝,其中前面的1代表样式为（高亮）后半代表颜色
 	currentColor: db 0				;当前选择颜色与color首地址的偏差值
 	
 section .bss
-	buff resb 1	;每次输入的字符地址;TODO 可以考虑resd统一
-	varX resd 1	;用来放输入的x(已处理好的)
-	varY resd 1	;用来放输入的y(已处理好的)
+	buff: resb 1	;每次输入的字符地址;TODO 可以考虑resd统一
+	varX: resd 1	;用来放输入的x(已处理好的)
+	varY: resd 1	;用来放输入的y(已处理好的)
 	
-	fibA resd 100	;相当于fib中的f(n-2)
-	fibB resd 100 	;相当于fib中的f(n-1)
+	fibA: resd 100	;相当于fib中的f(n-2)
+	fibB: resd 100 	;相当于fib中的f(n-1)
 	tempB: resd 100	;做除法时每次用来存b区域的，因为会清零，但真正b区域里的不能被清零
 
-	aPointer resd 1	;fibA的地址
-	bPointer resd 1	;fibB的地址
-	tempBPointer resd 1;tempB的地址
+	aPointer: resd 1	;fibA的地址
+	bPointer: resd 1	;fibB的地址
+	tempBPointer: resd 1;tempB的地址
 
-	dividePointer resd 1;除十取余时每次除法的地址
+	dividePointer: resd 1;除十取余时每次除法的地址
 	
-		
-	output resd 1	;输出地址的单元
+	output: resd 1	;输出地址的单元
 
 section .text
 	global main
@@ -95,15 +93,15 @@ saveY:  mov eax,[input]
 startFib:
 	mov eax,fibA
 	mov [aPointer],eax
-	mov ebx,fibB
-	mov [bPointer],ebx
+	mov ecx,fibB
+	mov [bPointer],ecx
 	mov ecx,tempB
 	mov [tempBPointer],ecx
 
 	mov eax,0
 	mov [fibA],eax	;初始化fib(0)=0
-	mov ebx,1
-	mov [fibB],ebx	;初始化fib(1)=1
+	mov ecx,1
+	mov [fibB],ecx	;初始化fib(1)=1
 
 	mov eax,99
         mov [loopInitial],eax	;初始化循环计数器 因为可能已经被改写了
@@ -121,13 +119,13 @@ initialAB:
 	mov ecx,0
 	mov [edx],ecx
 
-	mov ebx,[bPointer]	;继续初始化fibB
-        add ebx,4               ;往前走 继续初始化为0
-        mov [bPointer],ebx
+	mov eax,[bPointer]	;继续初始化fibB
+        add eax,4               ;往前走 继续初始化为0
+        mov [bPointer],eax
       
-	mov ecx,[bPointer]      ;ecx里放的是要初始为0的地址单元 
-        mov edx,0
-        mov [ecx],edx
+	mov edx,[bPointer]      ;ecx里放的是要初始为0的地址单元 
+        mov ecx,0
+        mov [edx],ecx
 
 	mov eax,[loopInitial]
 	dec eax			;初始化循环计数器减一
@@ -140,6 +138,7 @@ exitInitial:
 	mov [aPointer],eax
 	mov ebx,fibB
 	mov [bPointer],ebx
+	jmp countFibSpecial
 
 ;-------------------------------------------------------------------------------
 
@@ -226,12 +225,12 @@ addFibAB:
 	mov ecx,100
 	mov [loopAdd],ecx
 
-	mov ecx,0
+	mov ecx,00h
 	mov [carryBit],ecx
 
 loopAddAB:
 	mov ecx,[loopAdd]
-	cmp ecx,0
+	cmp ecx,00h
 	je endLoopAdd
 	
 	mov ecx,[eax]	;在call addFibAB之前就存好的  eax=[aPointer]=56780000 ; ebx=[bPointer]=12340000
@@ -250,17 +249,17 @@ fibABOverflow:
 	mov ecx,[carryBit]
 	add edx,ecx	;因为它一下就溢出了，还没来得及加上上次的进位位，现在加上！这次加是不会再次溢出的 eg:1111+1111=(1)1110
 	
-	mov ecx,1
+	mov ecx,01h
 	mov [carryBit],ecx	;为下一轮加法准备好进位位1
 	jmp moveBackLoop
 
 fibABCarryBitOverflow:
-	mov ecx,1	;下一轮进位位=1
+	mov ecx,01h	;下一轮进位位=1
 	mov [carryBit],ecx
 	jmp moveBackLoop
 
 noOverflowAtAll:
-	mov ecx,0	;下一轮进位位=0
+	mov ecx,00h	;下一轮进位位=0
 	mov [carryBit],ecx
 	jmp moveBackLoop
 
@@ -321,9 +320,9 @@ copyFibBToTempB:
 prepareFibB:
 
 	;一系列操作把fibB的值从二进制变成十进制并以ASCII码的形式压栈存起来
-	mov eax,[pushNum]	
-	mov eax,0
-	mov [pushNum],eax	;初始化压栈次数
+	mov ecx,[pushNum]	
+	mov ecx,0
+	mov [pushNum],ecx	;初始化压栈次数
 	
 	;把b区域的copy到tempB
 	call copyFibBToTempB
@@ -350,7 +349,7 @@ loopDecimal:
 	movzx eax,al	
 	cmp eax,0
 	je decDividePointer;如果当前byte全部被除没了（因为得到余数的过程也是位数下降的过程），就可以继续往下个byte了
-	jmp backLoopToDecimal	;否则继续除这个byte
+	jmp loopDecimal	;否则继续除这个byte
 
 decDividePointer:
 	dec ebx
@@ -365,16 +364,8 @@ decDividePointer:
 	je decDividePointer	;还要看这个byte是不是本来就是0,是的话就不用理他了，因为这个字节十怎么除都不会留余数给下一个字节用的
 
 	mov [dividePointer],ebx
-	jmp backLoopToDecimal	;否则带着减了一的ebx回去继续战斗！
-
-backLoopToDecimal:
-	mov ecx,[tempBPointer]
-	cmp ebx,ecx
-	jb endLoopToDecimal
-	jmp loopDecimal
-
-endLoopToDecimal:
-	jmp printFibB	
+	jmp loopDecimal	;否则带着减了一的ebx回去继续战斗！
+	
 ;------------------------
 dividedByTen:		;ebx里有dividePointer里的值 所以不要动ebx
 	mov edx,0	;余数初始化为0
@@ -387,6 +378,7 @@ loopDivideByte:
 
 	mov al,byte[ebx]	;当前要除的byte里的值
 	movzx eax,al
+
 	add eax,ecx	;eax里放了加了上一轮余数左移8位和现在byte相加的值（类比加法还得拖家带口个进位位）
 	mov ecx,10	;ecx=10	
 	div ecx		;eax/ecx=eax......edx
@@ -403,37 +395,64 @@ endLoopDivideByte:
 	ret		;成功取到最低位的余数并存在edx中，回loopDecimal交差！
 ;-------------------------------
 printFibB:
-popStack:
-	mov edx,[pushNum]
-	cmp edx,0
-	je endPrint
+changeColor:			
+			mov ebp, color			;改变当前输出颜色，先把颜色的起始地址给ebp
+			add ebp, [currentColor]	;再加上当前颜色与起始地址的偏移，得到当前颜色的地址
 
-	dec edx
-	mov [pushNum],edx
+			mov eax, 4
+			mov ebx, 1
+			mov ecx, ebp			
+			mov edx, 7
+			int 80h
+			
+		popStackLoop:
+			
+			mov edx, [pushNum]	;把剩余的压栈次数给dex
+			cmp edx, 00h			;比较剩余的压栈次数 和 0 的大小
+			je  endPrint			;如果剩余压栈次数为0，结束本轮输出
+
+			dec edx					;如果剩余压栈次数不为0，剩余压栈次数减一
+			mov [pushNum], edx	;把新得到的剩余压栈次数的值保存
+
+		;	pop ecx					;出栈，把值先给ecx
+			pop rcx
+			mov [output], ecx;再把该值给printByteAddr
+
+			mov eax, 4				;输出该值
+			mov ebx, 1
+			mov ecx, output
+			mov edx, 1
+			int 80h
+
+			jmp popStackLoop		;继续进行出栈的循环
+
+		endPrint:
+			mov eax, 4				;本轮输出结束，输出换行
+			mov ebx, 1
+			mov ecx, endl
+			mov edx, 2
+			int 80h
+			
+
+		changeCurrentColor:		
+			mov ebp, dword[currentColor]	;改变下一次输出颜色与起始地址的偏移值，先把当前输出颜色与起始地址的偏移值给ebp
+			add ebp, 7						;偏移值加7，得到新的偏移值
+			cmp ebp, 50						;检查偏移值是否越界
+			jna NotBackZero					;如果没有越界，则不需要进行归0处理
+			mov ebp, 0						;越界的话，新偏移值置0
 	
-	pop rcx
-	mov [output],rcx
+		NotBackZero:
+			mov [currentColor], ebp			;把新得到的偏移值保存到currentColor中，
+			
+		;	pop ebx							
+			pop rbx		
+		;	ret								;返回调用它的handleEachNum主程序段
 
-	mov eax,4
-	mov ebx,1
-	mov ecx,output
-	mov edx,1
-	int 80h
-
-	jmp popStack
-
-endPrint:
-	mov eax,4
-	mov ebx,1
-	mov ecx,endl
-	mov edx,2
-	int 80h
-
-endOutputFibB:
-	mov eax,[fibN]
-	inc eax
-	mov [fibN],eax
-	jmp countFib	;输出一个继续跳回正常的算fib
+		endOutput:
+			mov eax,[fibN]
+			inc eax
+			mov [fibN],eax
+			jmp countFib	;输出一个继续跳回正常的算fib
 
 ;-------------------------------------------------------------------------
 ;------------------------------------------------------

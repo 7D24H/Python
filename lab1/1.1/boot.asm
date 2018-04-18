@@ -1,5 +1,5 @@
 org 07c00h
-mov ax,cs
+mov ax,cs	;2,3,4行使得ds es cs指向相同的段
 mov ds,ax
 mov es,ax
 call DispStr
