@@ -1,11 +1,10 @@
+;fib.asm
+
 section .data
-	promptString db "Please input x and y:",0ah ;提示输入
-	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
-	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
+	
 
 	newLine: db ' ',0Ah
 	loopInitialABNum: dd 99	;给a,b初始化时用到的循环计数器，“高高低低原则”	;;db->dd 
-	loopCopyB:dd 100
 	loopAddNum: dd 100		;数据相加的时候用到的循环计数器
 	isOverflow: dd 0		;数据相加的时候用到的表示是否产生进位的变量，初始化为0，代表没有进位；若为1，则代表有进位
 	
@@ -15,6 +14,9 @@ section .data
 	currentColor: db 0				;当前选择颜色与color首地址的偏差值
 
 ;---------------------------
+	promptString db "Please input x and y:",0ah ;提示输入
+	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
+	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
 
 	zero db '0',0xa
 	one db '1',0xa	
@@ -37,8 +39,6 @@ section .bss
 
 	nextDivisionStartAddr resd 1;除十取余时每次除法的地址
 		
-	output resd 1	;输出地址的单元
-
 section .text
 	global main
 
@@ -97,7 +97,7 @@ saveY:  mov eax,[input]
 handleEachNum:
 
 	;	push ebx		;由于dealWithEachArg是被其他方法调用的，ebx的值在其他方法中有用，所以返回的时候ebx不能被修改，因此先将ebx压栈
-		push rbx
+	;	push rbx
 		mov eax, a		;aPointer中存储的值是a的起始地址
 		mov [aPointer], eax
 		mov ecx, b		;bPointer中存储的值是b的起始地址
@@ -146,7 +146,7 @@ handleEachNum:
 		;初始化结束
 		endInitialAB:
 		;	pop ebx				;ebx在这里先出栈，但是如果下面的过程要改变ebx的值，依然需要压栈处理（如果现在不出栈，后期再出栈的话我怕会乱）
-			pop rbx
+	;		pop rbx
 			mov eax, a			;由于刚才循环的时候改变了aPointer的值，所以重新把a那部分内存的起始地址赋值给aPointer去存储
 			mov [aPointer], eax
 			mov eax, b			;由于刚才循环的时候改变了bPointer的值，所以重新把b那部分内存的起始地址赋值给bPointer去存储

@@ -5,13 +5,12 @@ section .data
 	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
 	pushNum dd 0	;压栈次数
 
-	loopInitial db 99	;初始化fibA fibB用的循环计数器
-	loopAdd db 100	;fibA fibB逐个单元相加时用到的计数器
-	loopCopyB db 100;将fibB拷贝到tempB时用到的计数器
+	loopInitial dd 99	;初始化fibA fibB用的循环计数器
+	loopAdd dd 100	;fibA fibB逐个单元相加时用到的计数器
 
-	carryBit db 0	;加法时用来存上一轮相加的进位的
+	carryBit dd 0	;加法时用来存上一轮相加的进位的
 
-	dividePointer dd 0;除十取余时每次除法的地址
+	
 
 	zero db '0',0xa
 	one db '1',0xa	
@@ -32,6 +31,8 @@ section .bss
 	aPointer resd 1	;fibA的地址
 	bPointer resd 1	;fibB的地址
 	tempBPointer resd 1;tempB的地址
+
+	dividePointer resd 1;除十取余时每次除法的地址
 	
 		
 	output resd 1	;输出地址的单元
@@ -104,12 +105,12 @@ startFib:
 	mov ebx,1
 	mov [fibB],ebx	;初始化fib(1)=1
 
-	mov al,99
-        mov [loopInitial],al	;初始化循环计数器 因为可能已经被改写了
+	mov eax,99
+        mov [loopInitial],eax	;初始化循环计数器 因为可能已经被改写了
 
 initialAB:
-	mov al,[loopInitial]
-	cmp al,0
+	mov eax,[loopInitial]
+	cmp eax,0
 	je exitInitial
 	
 	mov eax,[aPointer]	;继续初始化fibA
@@ -128,9 +129,9 @@ initialAB:
         mov edx,0
         mov [ecx],edx
 
-	mov al,[loopInitial]
-	dec al			;初始化循环计数器减一
-	mov [loopInitial],al
+	mov eax,[loopInitial]
+	dec eax			;初始化循环计数器减一
+	mov [loopInitial],eax
 
 	jmp initialAB		;继续初始化
 
@@ -222,15 +223,15 @@ countFib:
 	jmp compareVarX
 ;--------------------------------------------------------
 addFibAB:
-	mov cl,100
-	mov [loopAdd],cl
+	mov ecx,100
+	mov [loopAdd],ecx
 
-	mov ch,0
-	mov [carryBit],ch
+	mov ecx,0
+	mov [carryBit],ecx
 
 loopAddAB:
-	mov cl,[loopAdd]
-	cmp cl,0
+	mov ecx,[loopAdd]
+	cmp ecx,0
 	je endLoopAdd
 	
 	mov ecx,[eax]	;在call addFibAB之前就存好的  eax=[aPointer]=56780000 ; ebx=[bPointer]=12340000
@@ -239,8 +240,7 @@ loopAddAB:
 	add edx,ecx
 	jc fibABOverflow	;jc=jump if carry,有进位就跳转
 	
-	mov cl,[carryBit]	;单纯相加时没有溢出，安心加上进位位
-	movzx ecx,cl
+	mov ecx,[carryBit]	;单纯相加时没有溢出，安心加上进位位
 	
 	add edx,ecx
 	jc fibABCarryBitOverflow;加上进位位突然溢出！
@@ -270,9 +270,9 @@ moveBackLoop:
 	add eax,4	;通通向后，得到下一个要相加的单元
 	add ebx,4	
 
-	mov cl,[loopAdd]
-	dec cl
-	mov [loopAdd],cl
+	mov ecx,[loopAdd]
+	dec ecx
+	mov [loopAdd],ecx
 
 	jmp loopAddAB
 endLoopAdd:
