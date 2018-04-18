@@ -1,17 +1,24 @@
 section .data
 	promptString db "Please input x and y:",0ah ;提示输入
 	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
-	endl dd 0xa	;换行
+	endl db 0xa	;换行
 	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
 	pushNum dd 0	;压栈次数
 
-	loopInitial dd 99	;初始化fibA fibB用的循环计数器
-	loopAdd dd 100	;fibA fibB逐个单元相加时用到的计数器
-	carryBit dd 0	;加法时用来存上一轮相加的进位的
+	loopInitial db 99	;初始化fibA fibB用的循环计数器
+	loopAdd db 100	;fibA fibB逐个单元相加时用到的计数器
+	loopCopyB db 100;将fibB拷贝到tempB时用到的计数器
+
+	carryBit db 0	;加法时用来存上一轮相加的进位的
+
+	dividePointer dd 0;除十取余时每次除法的地址
 
 	zero db '0',0xa
 	one db '1',0xa	
 	fibN dd 0	;计算到第几个fib值	
+
+	color: db 27,"[1;31m",27,"[1;32m",27,"[1;33m",27,"[1;34m",27,"[1;35m",27,"[1;36m",27,"[1;37m",27,"[1;30m"       ;红绿黄蓝,其中前面的1代表样式为（高亮）后半代表颜色
+	currentColor: db 0				;当前选择颜色与color首地址的偏差值
 	
 section .bss
 	buff resb 1	;每次输入的字符地址;TODO 可以考虑resd统一
@@ -20,10 +27,12 @@ section .bss
 	
 	fibA resd 100	;相当于fib中的f(n-2)
 	fibB resd 100 	;相当于fib中的f(n-1)
-	
+	tempB: resd 100	;做除法时每次用来存b区域的，因为会清零，但真正b区域里的不能被清零
+
 	aPointer resd 1	;fibA的地址
 	bPointer resd 1	;fibB的地址
-	dividePointer resd 1;除十取余时每次除法的地址
+	tempBPointer resd 1;tempB的地址
+	
 		
 	output resd 1	;输出地址的单元
 
@@ -40,6 +49,9 @@ main:	mov rax,0
 	mov ecx,promptString	;Pass offset of the message
 	mov edx,promptLen	;Pass the length of the message
 	int 80h		;Make syscall to output the text to stdout
+
+	mov ebp,0	;currentColor要初始化，不知道为什么...
+	mov [currentColor],ebp
 
 read:	mov eax,3	;Specify sys_read call	;标准输入
 	mov ebx,0	;Specify FILE Descriptor 0:Standard Input
@@ -84,37 +96,41 @@ startFib:
 	mov [aPointer],eax
 	mov ebx,fibB
 	mov [bPointer],ebx
+	mov ecx,tempB
+	mov [tempBPointer],ecx
 
 	mov eax,0
 	mov [fibA],eax	;初始化fib(0)=0
 	mov ebx,1
 	mov [fibB],ebx	;初始化fib(1)=1
 
-	mov eax,99
-        mov [loopInitial],eax	;初始化循环计数器 因为可能已经被改写了
+	mov al,99
+        mov [loopInitial],al	;初始化循环计数器 因为可能已经被改写了
 
 initialAB:
-	mov eax,[loopInitial]
-	cmp eax,0
+	mov al,[loopInitial]
+	cmp al,0
 	je exitInitial
 	
 	mov eax,[aPointer]	;继续初始化fibA
 	add eax,4		;往前走 继续初始化为0
 	mov [aPointer],eax
-	mov ecx,[aPointer]	;ecx里放的是要初始为0的地址单元	
-	mov edx,0
-	mov [ecx],edx
+	
+	mov edx,[aPointer]	;ecx里放的是要初始为0的地址单元	
+	mov ecx,0
+	mov [edx],ecx
 
 	mov ebx,[bPointer]	;继续初始化fibB
         add ebx,4               ;往前走 继续初始化为0
         mov [bPointer],ebx
-        mov ecx,[bPointer]      ;ecx里放的是要初始为0的地址单元 
+      
+	mov ecx,[bPointer]      ;ecx里放的是要初始为0的地址单元 
         mov edx,0
         mov [ecx],edx
 
-	mov eax,[loopInitial]
-	dec eax			;初始化循环计数器减一
-	mov [loopInitial],eax
+	mov al,[loopInitial]
+	dec al			;初始化循环计数器减一
+	mov [loopInitial],al
 
 	jmp initialAB		;继续初始化
 
@@ -206,15 +222,15 @@ countFib:
 	jmp compareVarX
 ;--------------------------------------------------------
 addFibAB:
-	mov ecx,100
-	mov [loopAdd],ecx
+	mov cl,100
+	mov [loopAdd],cl
 
-	mov ecx,0
-	mov [carryBit],ecx
+	mov ch,0
+	mov [carryBit],ch
 
 loopAddAB:
-	mov ecx,[loopAdd]
-	cmp ecx,0
+	mov cl,[loopAdd]
+	cmp cl,0
 	je endLoopAdd
 	
 	mov ecx,[eax]	;在call addFibAB之前就存好的  eax=[aPointer]=56780000 ; ebx=[bPointer]=12340000
@@ -222,7 +238,10 @@ loopAddAB:
 
 	add edx,ecx
 	jc fibABOverflow	;jc=jump if carry,有进位就跳转
-	mov ecx,[carryBit]	;单纯相加时没有溢出，安心加上进位位
+	
+	mov cl,[carryBit]	;单纯相加时没有溢出，安心加上进位位
+	movzx ecx,cl
+	
 	add edx,ecx
 	jc fibABCarryBitOverflow;加上进位位突然溢出！
 	jmp noOverflowAtAll	;good good怎样都不溢出～
@@ -230,6 +249,7 @@ loopAddAB:
 fibABOverflow:
 	mov ecx,[carryBit]
 	add edx,ecx	;因为它一下就溢出了，还没来得及加上上次的进位位，现在加上！这次加是不会再次溢出的 eg:1111+1111=(1)1110
+	
 	mov ecx,1
 	mov [carryBit],ecx	;为下一轮加法准备好进位位1
 	jmp moveBackLoop
@@ -250,9 +270,9 @@ moveBackLoop:
 	add eax,4	;通通向后，得到下一个要相加的单元
 	add ebx,4	
 
-	mov ecx,[loopAdd]
-	dec ecx
-	mov [loopAdd],ecx
+	mov cl,[loopAdd]
+	dec cl
+	mov [loopAdd],cl
 
 	jmp loopAddAB
 endLoopAdd:
@@ -278,14 +298,39 @@ compareVarY:
 	jmp exit	;fibN>varY 完成任务，正式退出！！（大部分都应该是在这里退的）
 
 ;--------------------------------
-
+;-------------------------------------------
+copyFibBToTempB:
+		mov ebx,[bPointer]	;一开始ebx里存b区域的最高位地址
+		add ebx,399
+		mov ecx,[tempBPointer]	;ecx存tempB区域的最高位地址
+		add ecx,399
+		
+	loopCopy:
+		mov eax,[bPointer]	;eax在这里是临时寄存器，里面存了b区域的低位首地址
+		cmp ebx,eax		;ebx比首地址还小了，说明拷贝结束
+		jb endLoop
+	
+		mov eax,[ebx]		;否则把ebx所指区域的值复制给ecx所指区域
+		mov [ecx],eax
+		dec ebx			;ebx,ecx同时递减
+		dec ecx	
+		jmp loopCopy		;;;;;;;;;
+	endLoop:
+		ret
+;-----------------------------------------------
 prepareFibB:
 
 	;一系列操作把fibB的值从二进制变成十进制并以ASCII码的形式压栈存起来
+	mov eax,[pushNum]	
 	mov eax,0
 	mov [pushNum],eax	;初始化压栈次数
+	
+	;把b区域的copy到tempB
+	call copyFibBToTempB
+	;返回以后tempB里就是和b里完全一样的东西了
 
-	mov ebx,[bPointer]	;ebx中放的是fibB区域的首地址
+	mov ebx, [tempBPointer]					;ebx中的值为b内存单元的起始地址
+
 	add ebx,399		;退到最高位的byte，因为fibB是resd 100,d=double word=4byte
 	mov [dividePointer],ebx	;进行除法的地址单元，一开始是最后一个byte
 
@@ -301,24 +346,35 @@ loopDecimal:
 
 	mov ebx,[dividePointer]	;call divideByTen的时候ebx被改写到和bPointer里的一样了（这个正是返回条件），所以一定要重新装进去
 
-	mov eax,[ebx]	;[ebx]的值在loopDivideByte每个byte被除一次为得到余数的时候都被存过
+	mov al,byte[ebx]	;[ebx]的值在loopDivideByte每个byte被除一次为得到余数的时候都被存过
+	movzx eax,al	
 	cmp eax,0
 	je decDividePointer;如果当前byte全部被除没了（因为得到余数的过程也是位数下降的过程），就可以继续往下个byte了
-	jmp loopDecimal	;否则继续除这个byte
+	jmp backLoopToDecimal	;否则继续除这个byte
 
 decDividePointer:
 	dec ebx
-	mov ecx,[bPointer]
+	mov ecx,[tempBPointer]
 	cmp ebx,ecx
 	jb printFibB	;ebx已经减到比fibB区域首地址都要小了，说明已经该压的栈全压了，打印！
 
 	;;;否则当然是要减少dividePointer的值啊！
-	mov eax,[ebx]
+	mov al,byte[ebx]
+	movzx eax,al
 	cmp eax,0
 	je decDividePointer	;还要看这个byte是不是本来就是0,是的话就不用理他了，因为这个字节十怎么除都不会留余数给下一个字节用的
 
 	mov [dividePointer],ebx
-	jmp loopDecimal	;否则带着减了一的ebx回去继续战斗！	
+	jmp backLoopToDecimal	;否则带着减了一的ebx回去继续战斗！
+
+backLoopToDecimal:
+	mov ecx,[tempBPointer]
+	cmp ebx,ecx
+	jb endLoopToDecimal
+	jmp loopDecimal
+
+endLoopToDecimal:
+	jmp printFibB	
 ;------------------------
 dividedByTen:		;ebx里有dividePointer里的值 所以不要动ebx
 	mov edx,0	;余数初始化为0
@@ -327,15 +383,17 @@ loopDivideByte:
 	mov eax,edx	;edx是上一轮除剩下的余数
 	mov ecx,256
 	mul ecx		;eax里现在放着左移了8位的余数，因为它相对于这轮要除的byte来说就是比他们要大256倍，得供起来，最多挤到16位，不会溢出的放心
+	mov ecx,eax	;;;
 
-	mov ecx,[ebx]	;当前要除的byte里的值
+	mov al,byte[ebx]	;当前要除的byte里的值
+	movzx eax,al
 	add eax,ecx	;eax里放了加了上一轮余数左移8位和现在byte相加的值（类比加法还得拖家带口个进位位）
 	mov ecx,10	;ecx=10	
 	div ecx		;eax/ecx=eax......edx
 
-	mov [ebx],eax	;把商存进原来的内存单元中
+	mov byte[ebx],al	;把商存进原来的内存单元中;;;;;;;;;;;;;;;
 
-	mov ecx,[bPointer]
+	mov ecx,[tempBPointer]
 	cmp ebx,ecx
 	je endLoopDivideByte
 	dec ebx		;这里是为了从高到低走一遍只为了最低位的那个余数，故每个字节除一次就可以了

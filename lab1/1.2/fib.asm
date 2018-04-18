@@ -1,36 +1,20 @@
 section .data
+	promptString db "Please input x and y:",0ah ;提示输入
+	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
+	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
 
 	newLine: db ' ',0Ah
-
-	eachNum: dd 0			;每一个输入的数字都被存放在这里，将其初始化为0
-
-	loopInitialABNum: db 99	;给a,b初始化时用到的循环计数器，“高高低低原则”
-
-	loopMoveNum: db 100		;数据移动的时候用到的循环计数器
-	
+	loopInitialABNum: dd 99	;给a,b初始化时用到的循环计数器，“高高低低原则”	;;db->dd 
 	loopCopyB:dd 100
-
-	loopAddNum: db 100		;数据相加的时候用到的循环计数器
-	isOverflow: db 0		;数据相加的时候用到的表示是否产生进位的变量，初始化为0，代表没有进位；若为1，则代表有进位
+	loopAddNum: dd 100		;数据相加的时候用到的循环计数器
+	isOverflow: dd 0		;数据相加的时候用到的表示是否产生进位的变量，初始化为0，代表没有进位；若为1，则代表有进位
 	
-	nextDivisionStartAddr:	dd 0;下一次除法的起始地址
-	
-	pushTotalNum: dd 0		;输出时，记录把余数压栈的总次数
-	
+	pushTotalNum: dd 0		;输出时，记录把余数压栈的总次数	
 
 	color: db 27,"[1;31m",27,"[1;32m",27,"[1;33m",27,"[1;34m",27,"[1;35m",27,"[1;36m",27,"[1;37m",27,"[1;30m"       ;红绿黄蓝,其中前面的1代表样式为（高亮）后半代表颜色
 	currentColor: db 0				;当前选择颜色与color首地址的偏差值
 
 ;---------------------------
-	promptString db "Please input x and y:",0ah ;提示输入
-	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
-	endl dd 0xa	;换行
-	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
-	pushNum dd 0	;压栈次数
-
-	loopInitial dd 99	;初始化fibA fibB用的循环计数器
-;	loopAdd dd 100	;fibA fibB逐个单元相加时用到的计数器
-	carryBit dd 0	;加法时用来存上一轮相加的进位的
 
 	zero db '0',0xa
 	one db '1',0xa	
@@ -41,10 +25,6 @@ section .bss
 	varX resd 1	;用来放输入的x(已处理好的)
 	varY resd 1	;用来放输入的y(已处理好的)
 	
-	;fibA resd 100	;相当于fib中的f(n-2)
-	;fibB resd 100 	;相当于fib中的f(n-1)
-	
-
 	a: resd 100				;在计算Fibonacci中用到的变量
 	b: resd 100				;在计算Fibonacci中用到的变量
 	tempB: resd 100	;做除法时每次用来存b区域的，因为会清零，但真正b区域里的不能被清零
@@ -55,7 +35,7 @@ section .bss
 	bPointer resd 1	;fibB的地址
 	tempBPointer resd 1;tempB的地址
 
-	;dividePointer resd 1;除十取余时每次除法的地址
+	nextDivisionStartAddr resd 1;除十取余时每次除法的地址
 		
 	output resd 1	;输出地址的单元
 
@@ -132,13 +112,13 @@ handleEachNum:
 		mov [b], ecx
 
 		;a和b各自还剩下9个double word的内存单元尚未初始化，每个对应的值均为0，用循环去初始化，loopInitialABNum用作循环计数器，初始值为99
-		mov al, 99
-		mov [loopInitialABNum], al
+		mov eax, 99
+		mov [loopInitialABNum], eax
 
 		;循环
 		loopInitialAB:
-			mov al, [loopInitialABNum]
-			cmp al, 0			;判断循环计数器loopInitialABNum的值是否为0
+			mov eax, [loopInitialABNum]
+			cmp eax, 0			;判断循环计数器loopInitialABNum的值是否为0
 			je  endInitialAB	;如果为0，那么跳出循环，初始化结束
 
 			mov eax, [aPointer]	;aPointer中存储的值是上一次a内存部分被初始化的单元（类型是double word）的起始地址（若是第一次，即是a的起始地址），把这个值给eax
@@ -157,9 +137,9 @@ handleEachNum:
 			mov ecx, 00h		;ecx赋值为0
 			mov [edx], ecx		;把ecx的值赋给edx中的值所指向的地址中，即把新的起始单元地址开始的4个Byte赋值0
 
-			mov al, [loopInitialABNum]	;把循环计数器loopInitialABNum的值减1，结果还要保存到loopInitialABNum中
-			dec al
-			mov [loopInitialABNum], al
+			mov eax, [loopInitialABNum]	;把循环计数器loopInitialABNum的值减1，结果还要保存到loopInitialABNum中
+			dec eax
+			mov [loopInitialABNum], eax
 
 			jmp loopInitialAB
 
@@ -293,15 +273,15 @@ countFib:
 	jmp compareVarX
 ;--------------------------------------------------------
 addData:
-		mov cl, 100				;每一次先把loopAddNum赋值为100
-		mov [loopAddNum], cl
+		mov ecx, 100				;每一次先把loopAddNum赋值为100
+		mov [loopAddNum], ecx
 		
-		mov ch, 00h				;每一次先把isOverflow赋值为0
-		mov [isOverflow], ch
+		mov ecx, 00h				;每一次先把isOverflow赋值为0
+		mov [isOverflow], ecx
 		
 	loopAdd:
-		mov cl, [loopAddNum]
-		cmp cl, 00h				;如果cl(loopAddNum)的值为0，跳出循环
+		mov ecx, [loopAddNum]
+		cmp ecx, 00h				;如果cl(loopAddNum)的值为0，跳出循环
 		je endLoopAdd
 		
 		mov ecx, [eax]			;把以eax中的值为地址的那部分内容复制到ecx中去------源内存
@@ -310,8 +290,8 @@ addData:
 		add edx, ecx			;edx中的值加上ecx中的值，即目的内存的一个dw加上源内存对应的那个dw
 		jc twoOperandsOverflow	;如果两个操作数相加就已经溢出的话，转去twoOperandsOverflow
 		
-		mov cl, [isOverflow]	;如果两个操作数相加没有溢出，那么把上一次循环得到的进位给cl
-		movzx ecx, cl			;cl中的值做位扩展，现在ecx中的值为上一次循环得到的进位
+		mov ecx, [isOverflow]	;如果两个操作数相加没有溢出，那么把上一次循环得到的进位给cl
+		;movzx ecx, cl			;cl中的值做位扩展，现在ecx中的值为上一次循环得到的进位
 
 		add edx, ecx			;edx中的值再加上传来的进位
 		jc addCarryOverflow		;如果溢出，就去addCarryOverflow
@@ -347,9 +327,9 @@ addData:
 		add eax, 4				;eax中的值加4，得到下一个源内存单元（类型为double word）的起始地址（逐渐由低位到高位）
 		add ebx, 4				;ebx中的值加4，得到下一个目的内存单元（类型为double word）的起始地址（逐渐由低位到高位）
 		
-		mov cl, [loopAddNum]	;loopAddNum中的值减1，保存
-		dec cl
-		mov [loopAddNum], cl
+		mov ecx, [loopAddNum]	;loopAddNum中的值减1，保存
+		dec ecx
+		mov [loopAddNum], ecx
 		
 		jmp loopAdd
 		
@@ -419,7 +399,7 @@ compareVarY:
 		cmp eax, 0						;判断最高位的值是否为0
 		je  changeNextDivisionStartAddr	
 		
-		jmp backLoopToDecimal			;如果最高位的值不为0的话，返回循环的过程
+		jmp loopToDecimal			;如果最高位的值不为0的话，返回循环的过程
 		
 		;最高位的值为0的话，那么取下一个地址（低地址），若其中的值为0，继续循环，直至地址数到达b内存单元的开始或者地址内所含值不为0
 		changeNextDivisionStartAddr:		
@@ -428,22 +408,14 @@ compareVarY:
 				dec ebx
 				mov ecx, [tempBPointer]		;ecx中的值是b内存单元的起始地址
 				cmp ebx, ecx			;比较 下一个地址（低地址）和 b内存单元的起始地址 的大小
-				jb	endLoopToDecimal	;如果 下一个地址（低地址）小于 b内存单元的起始地址 的话，直接结束
+				jb	printResult	;如果 下一个地址（低地址）小于 b内存单元的起始地址 的话，直接结束
 				mov al, byte[ebx]		;如果不等于的话，取出下一个地址中的值（byte类型），放入al中
 				movzx eax, al			;al做位扩展，结果放入eax中
 				cmp eax, 0				;看eax中的值是否为0
 				je loopDecreaseAddr		;如果为0，那么继续取在下一位的地址，做循环判断
 				mov [nextDivisionStartAddr], ebx	;如果不为0，那么把这个地址给nextDivisionStartAddr
-				jmp backLoopToDecimal	;返回循环的过程
-			
-		backLoopToDecimal:
-			mov ecx, [tempBPointer]			;ecx中的值是b内存单元的起始地址
-			cmp ebx, ecx				;比较下一次“字节循环除10”的起始地址 和 b内存单元的起始地址 的大小
-			jb	endLoopToDecimal		;如果下一次“字节循环除10”的起始地址 小于 b内存单元的起始地址 的话，结束
-			jmp loopToDecimal			;反之，继续循环
+				jmp loopToDecimal	;返回循环的过程
 	
-	endLoopToDecimal:
-		jmp printResult			;转换结束后，输出结果
 
 ;-------------------------------------------
 copyFibBToTempB:
@@ -544,6 +516,8 @@ copyFibBToTempB:
 			
 			mov al, byte[ebx]	;把当前地址指向的值的byte形式给al
 			movzx eax, al		;al中的值做位扩展
+			;mov eax, [ebx]	;把当前地址指向的值的byte形式给al;;;;;;;;;;;;;;;;;
+
 			add eax, ecx		;上一字节所得余数乘上256与本字节的值相加
 			mov ecx, 10
 			div ecx				;余数在edx中，商在eax中
@@ -569,4 +543,3 @@ copyFibBToTempB:
 exit:   mov eax,1	;Specify Exit sys	;结束
         mov ebx,0	;a code of zero
         int 80h		;Make the sys to terminate the program
-
