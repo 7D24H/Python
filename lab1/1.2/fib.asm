@@ -4,6 +4,9 @@ section .data
 	promptString db "Please input x and y:",0ah ;提示输入
 	promptLen equ $-promptString ;当前位置减字符串首地址即为字符长度
 
+	wrongString db 0ah,"Please be sure y >= x,try again!",0ah	;当输入的y<x时的错误信息提示
+	wrongLen equ $-wrongString
+
 	newLine: db ' ',0Ah
 	loopInitialABNum: dd 99	;给a,b初始化时用到的循环计数器，“高高低低原则”	;;db->dd 
 	loopAddNum: dd 100		;数据相加的时候用到的循环计数器
@@ -14,9 +17,6 @@ section .data
 	color: db 27,"[1;31m",27,"[1;32m",27,"[1;33m",27,"[1;34m",27,"[1;35m",27,"[1;36m",27,"[1;37m",27,"[1;30m"       ;红绿黄蓝,其中前面的1代表样式为（高亮）后半代表颜色
 	currentColor: db 0				;当前选择颜色与color首地址的偏差值
 
-;---------------------------
-	;promptString: db "Please input x and y:",0ah ;提示输入
-	;promptLen: equ $-promptString ;当前位置减字符串首地址即为字符长度
 	input dd 0	;就是一个用来存储每次输入的（十进制）数字的容器
 
 	zero db '0',0xa
@@ -64,10 +64,16 @@ read:	mov eax,3	;Specify sys_read 	;标准输入
 	int 80h		; sys_read
 
 	mov cl,byte[buff]
+	
 	cmp cl,' '	;如果是空格 存储x
 	je saveX
 	cmp cl,0xa	;如果是回车 存储y
 	je saveY
+
+	;cmp cl,'0'
+	;jl wrongPrint
+	;cmp cl,'9'
+	;jg wrongPrint
 ;------------------------------
 ;这里的作用是将输入的ASCII码转成真正字面上的十进制
 ;方法是将之前存在input里的数乘十，再加上新输入的
@@ -93,7 +99,21 @@ saveY:  mov eax,[input]
         mov eax,0
         mov [input],eax	;其实这里input的清零不是必需的
 
+	mov eax,[varX]
+	mov ebx,[varY]
+	cmp eax,ebx
+	jg wrongPrint
+
 	jmp handleEachNum    ;这里开始进入fib计算
+;-----------------------------------------------------------
+wrongPrint:
+	mov eax,4
+	mov ebx,1
+	mov ecx,wrongString
+	mov edx,wrongLen
+	int 80h
+
+	jmp read	;main可以吗？？
 ;-----------------------------------------------------------
 handleEachNum:
 
