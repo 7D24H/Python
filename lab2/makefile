@@ -1,12 +1,12 @@
 # this is make file
 
-objects = main.o
+objects = try.o
 
-main: $(objects)
-	gcc -o main $(objects)
-main.o:main.c
-	gcc -c -o main.o main.c
+try: $(objects)
+	gcc -o try $(objects)
+try.o:try.c
+	gcc -c -o try.o try.c
 .PHONY:clean
 clean:
-	rm main $(objects)
+	rm try $(objects)
 

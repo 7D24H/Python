@@ -47,7 +47,7 @@ int getClus(FILE* file, int n);
 void printDirectoryPath(char* path);
 void printValidFile(char* path, Dir* dir);
 
-void my_print(char* c, int length);
+//void my_print(char* c, int length);
 void printStr(char* inputTip);
 void printNum(int num);
 void printWarning(char* warning);	//为了变色，单独提出来做一个方法
@@ -645,15 +645,18 @@ void printDirectoryPath(char* path){
 									
 	for(int i=0;i < strlen(path)-1;i++){	
 		if(path[i] != ' '){		
-			my_print(&path[i], 1);
+			//my_print(&path[i], 1);
+			printf("%s",&path[i]);
 		}
 		if(i%11 == 10){					
-			my_print("/", 1);		
+			//my_print("/", 1);		
+			printf("/");
 		}
 	}
 	
 	if(path[strlen(path)-1] != '/' && path[strlen(path)-1] != ' ' ){
-		my_print(&path[strlen(path)-1], 1);
+		//my_print(&path[strlen(path)-1], 1);
+		printf("%s",&path[strlen(path)-1]);
 	}
 	prepareTerminal();	
 }
@@ -672,14 +675,16 @@ void printValidFile(char* path, Dir* dir){
 								
 	for(int i=0; i<8; i++){		
 		if(dir->DIR_Filename[i] != ' '){
-			my_print(&dir->DIR_Filename[i], 1);	
+			//my_print(&dir->DIR_Filename[i], 1);	
+			printf("%s",&dir->DIR_Filename[i]);
 		}
 	}	
 	printStr(".\0");		
 							
 	for(int i=0; i<3; i++){		
 		if(dir->DIR_Extension[i] != ' '){
-			my_print(&dir->DIR_Extension[i], 1);
+			//my_print(&dir->DIR_Extension[i], 1);
+			printf("%s",&dir->DIR_Extension[i]);
 		}
 	}
 	printStr("\n\0");
@@ -712,7 +717,8 @@ void printNum(int num){
 输出字符串
 */
 void printStr(char* str){
-	my_print(str,strlen(str));							
+	//my_print(str,strlen(str));		
+	printf("%s",&str);					
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------
@@ -720,6 +726,7 @@ void printStr(char* str){
 */
 void printWarning(char* warning){
 	prepareWarning();
-	my_print(warning,strlen(warning));	
+	//my_print(warning,strlen(warning));	
+	printf("%s",&warning);
 	prepareTerminal();
 }
