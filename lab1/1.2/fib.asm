@@ -7,6 +7,9 @@ section .data
 	wrongString db 0ah,"Please be sure y >= x,try again!",0ah	;当输入的y<x时的错误信息提示
 	wrongLen equ $-wrongString
 
+	badInputString db 0ah,"Bad input!",0ah	;当输入的y<x时的错误信息提示
+	badInputLen equ $-wrongString
+
 	endl: db ' ',0Ah
 	loopInitial: dd 99	;给a,b初始化时用到的循环计数器，“高高低低原则”	;;db->dd 
 	loopAdd: dd 100		;数据相加的时候用到的循环计数器
@@ -70,10 +73,10 @@ read:	mov eax,3	;Specify sys_read 	;标准输入
 	cmp cl,0xa	;如果是回车 存储y
 	je saveY
 
-	;cmp cl,'0'
-	;jl wrongPrint
-	;cmp cl,'9'
-	;jg wrongPrint
+;	cmp cl,'0'
+;	jl badInput
+;	cmp cl,'9'
+;	jg badInput
 ;------------------------------
 ;这里的作用是将输入的ASCII码转成真正字面上的十进制
 ;方法是将之前存在input里的数乘十，再加上新输入的
@@ -115,6 +118,15 @@ wrongPrint:
 
 	jmp main	
 ;-----------------------------------------------------------
+;badInput:
+;	mov eax,4
+;	mov ebx,1
+;	mov ecx,wrongString
+;	mov edx,wrongLen
+;	int 80h
+
+;	jmp exit
+;------------------------------------------------------------
 startFib:
 		mov eax, a		
 		mov [aPointer], eax
