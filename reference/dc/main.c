@@ -775,5 +775,6 @@ void printMsg(char* msg){
 	int i=0;
 	for(i=0;i<strlen(msg);i++){
 		my_print(&msg[i],1);
+		//printf("%c",msg[i]);
 	}
 }

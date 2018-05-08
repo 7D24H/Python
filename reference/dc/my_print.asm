@@ -12,8 +12,8 @@ global change_color
 global reset_color
 
 my_print:
-	mov edx,dword[esp+8] ;第一个参数是输出的长度
-	mov ecx,dword[esp+4] ;从右往左第二个参数是要输出的字符
+	mov edx,[esp+8] ;第一个参数是输出的长度
+	mov ecx,[esp+4] ;从右往左第二个参数是要输出的字符
 	mov ebx,1
 	mov eax,4
 	int 80h
