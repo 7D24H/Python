@@ -59,7 +59,10 @@ struct Count
   int deep; 
 };
 
-void asmPrint(char* c,int len);
+void prepareOutputDirectory();
+void prepareOutputFile();
+void prepareWarning();
+void prepareTerminal();
 
 unsigned int getFATValue(int clus)
 {
@@ -94,7 +97,10 @@ unsigned int getFATValue(int clus)
 }
 void printDir(char* dir)
 {
-  printf("%s",dir);
+prepareOutputDirectory();
+ // printf("%s",dir);
+asmPrint(dir,strlen(dir));
+prepareTerminal();
 }
 int judgeChar(char a)
 {
@@ -104,10 +110,9 @@ int judgeChar(char a)
     return 0;
 }
 void printMessage(char* message)
-{	asmPrint(message,strlen(message));
-
-// printf("%s",message);
-}
+{ prepareOutputFile();
+  printf("%s",message);
+  prepareTerminal();}
 void fillBPB(FILE* fat12,struct BPB* bpb_ptr)
 {
   int sign = fseek(fat12,11,SEEK_SET);
@@ -128,13 +133,14 @@ void fillBPB(FILE* fat12,struct BPB* bpb_ptr)
   RsvdSecCnt = bpb_ptr->BPB_RsvdSecCnt;
   FATSz = bpb_ptr->BPB_FATSz16;
   NumFATs = bpb_ptr->BPB_NumFATs;
-  printf("每簇有%d扇区\n",SecPerClus);
-  printf("每扇区有%d个字节\n",BytsPerSec);
-  printf("根目录文件数最大值%d\n",RootEntCnt);
-  printf("Boot记录占用%d扇区\n",RsvdSecCnt);
-  printf("每FAT表扇区数%d\n",FATSz);
-  printf("FAT表个数%d\n",NumFATs);
-  printf("根目录项长度%d\n",sizeof(struct RootItem));
+  //printf("每簇有%d扇区\n",SecPerClus);
+  //printf("每扇区有%d个字节\n",BytsPerSec);
+ // printf("根目录文件数最大值%d\n",RootEntCnt);
+ // printf("Boot记录占用%d扇区\n",RsvdSecCnt);
+//  printf("每FAT表扇区数%d\n",FATSz);
+ // printf("FAT表个数%d\n",NumFATs);
+ // printf("根目录项长度%d\n",sizeof(struct RootItem));
+	
 }
 int getByteOffset(FILE* fat12,int isPrintContent)
 {
@@ -450,6 +456,7 @@ int main()
   char* input = (char*)malloc(sizeof(char)*100);
   while(1)
   {
+	asmPrint(">",1);
     //初始化
     searchFileType = 0;
     deepOfDir = -1;
@@ -465,8 +472,7 @@ int main()
 	//主目录
 	  if(strcmp(input,"ls")==0)
 	  {
-	   // int base = (RsvdSecCnt+NumFATs*FATSz)*BytsPerSec;
-		int base=0x2600;
+	    int base = (RsvdSecCnt+NumFATs*FATSz)*BytsPerSec;
 		int allBytes = ((RootEntCnt*32+BytsPerSec-1)/BytsPerSec)*BytsPerSec;
 //		printf("根目录起始字节偏移%d. 根目录字节数%d\n",base,allBytes);
 		printDirAndFileName(fat12,base,allBytes,0);

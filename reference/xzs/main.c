@@ -58,9 +58,6 @@ struct Count
   int spaceNum[20];
   int deep; 
 };
-
-void asmPrint(char* c,int len);
-
 unsigned int getFATValue(int clus)
 {
   FILE* fat12 = fopen("a.img","rb");
@@ -104,10 +101,7 @@ int judgeChar(char a)
     return 0;
 }
 void printMessage(char* message)
-{	asmPrint(message,strlen(message));
-
-// printf("%s",message);
-}
+{ printf("%s",message);}
 void fillBPB(FILE* fat12,struct BPB* bpb_ptr)
 {
   int sign = fseek(fat12,11,SEEK_SET);
@@ -465,8 +459,7 @@ int main()
 	//主目录
 	  if(strcmp(input,"ls")==0)
 	  {
-	   // int base = (RsvdSecCnt+NumFATs*FATSz)*BytsPerSec;
-		int base=0x2600;
+	    int base = (RsvdSecCnt+NumFATs*FATSz)*BytsPerSec;
 		int allBytes = ((RootEntCnt*32+BytsPerSec-1)/BytsPerSec)*BytsPerSec;
 //		printf("根目录起始字节偏移%d. 根目录字节数%d\n",base,allBytes);
 		printDirAndFileName(fat12,base,allBytes,0);

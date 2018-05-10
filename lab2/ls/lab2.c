@@ -128,13 +128,14 @@ void fillBPB(FILE* fat12,struct BPB* bpb_ptr)
   RsvdSecCnt = bpb_ptr->BPB_RsvdSecCnt;
   FATSz = bpb_ptr->BPB_FATSz16;
   NumFATs = bpb_ptr->BPB_NumFATs;
-  printf("每簇有%d扇区\n",SecPerClus);
-  printf("每扇区有%d个字节\n",BytsPerSec);
-  printf("根目录文件数最大值%d\n",RootEntCnt);
-  printf("Boot记录占用%d扇区\n",RsvdSecCnt);
-  printf("每FAT表扇区数%d\n",FATSz);
-  printf("FAT表个数%d\n",NumFATs);
-  printf("根目录项长度%d\n",sizeof(struct RootItem));
+  //printf("每簇有%d扇区\n",SecPerClus);
+ // printf("每扇区有%d个字节\n",BytsPerSec);
+ // printf("根目录文件数最大值%d\n",RootEntCnt);
+ // printf("Boot记录占用%d扇区\n",RsvdSecCnt);
+ // printf("每FAT表扇区数%d\n",FATSz);
+//printf("FAT表个数%d\n",NumFATs);
+ // printf("根目录项长度%d\n",sizeof(struct RootItem));
+	asmPrint("\n",1);
 }
 int getByteOffset(FILE* fat12,int isPrintContent)
 {

@@ -1,10 +1,11 @@
-objects	=	main.o my_print.o
-main	:	$(objects)
-	gcc -o main $(objects)
-main.o	:	main.c
-	gcc -c -o main.o main.c
-my_print.o	:	my_print.asm
-		nasm -f elf -o my_print.o my_print.asm	
-.PHONY	:	clean
-clean	:
+objects = my_print.o
+main: my_print.o
+	gcc -m32 main.c my_print.o
+
+my_print.o : my_print.asm
+	nasm -f elf32 my_print.asm
+#main: main.c my_print.o
+#	gcc -m32 main.c my_print.o
+.PHONY : clean
+clean :
 	rm main $(objects)
