@@ -6,6 +6,7 @@ contains variable names and long labels, and .dta file contains data types.
 Then finish these question in problem.py using pandas library:
 (1)How many countries in this database of financial reforms?
 (2)What is the median number of the year observations in this database of financial reforms for each country?
+//指国家出现数量的中位数
 
 return [countries, medianNumber];
 countries is the answer of question (1);
