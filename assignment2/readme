@@ -1,0 +1,120 @@
+T1:
+Here is a database of financial reforms, covering some economies over 1973 - 2005. You can get it from url
+"https://www.imf.org/external/pubs/ft/wp/2008/Data/wp08266.zip", using requests library. In .zip file, Excel file
+contains variable names and long labels, and .dta file contains data types.
+
+Then finish these question in problem.py using pandas library:
+(1)How many countries in this database of financial reforms?
+(2)What is the median number of the year observations in this database of financial reforms for each country?
+//指国家出现数量的中位数
+
+return [countries, medianNumber];
+countries is the answer of question (1);
+medianNumber is the answer of question (2);
+
+----------------------------------------------------------------------------------------
+
+T2:
+Download .zip file "ml-latest-small.zip" recommended for education and development from url "https://grouplens.org/datasets/movielens/".
+The data are contained in the files `links.csv`, `movies.csv`, `ratings.csv` and `tags.csv`.
+This dataset describes 5-star rating and free-text tagging activity.
+Users were selected at random for inclusion. All selected users had rated at least 20 movies.
+No demographic information is included. Each user is represented by an id, and no other information is provided.
+
+Finish these question in problem.py using pandas library:
+<1>What are the name of the movie of which movie Id is 1?
+<2>How many genres for movie which movie Id is 1?
+<3>What is name of the most rated movie?
+
+return [movieNameOfMovieId1, genresCounts, movieNameOfTheMostRatedMovie]
+movieNameOfMovieId1 is the answer of question (1)
+genresCounts is the answer of question (2)
+movieNameOfTheMostRatedMovie is the answer of question (3)
+
+
+---------------------------------------------------------------------------------
+
+T3:
+Here is a database of financial reforms, covering some economies over 1973 - 2005. You can get it from url
+"https://www.imf.org/external/pubs/ft/wp/2008/Data/wp08266.zip", using requests library. In .zip file, Excel file
+contains variable names and long labels, and .dta file contains data types.
+
+Then finish these question in problem.py using pandas library:
+(1)Which one country has the highest pace of implementing finacial reforms among transition countries?
+
+return movieName
+movieName is the answer of question (1)
+
+
+--------------------------------------------------------------------------------
+T4:
+频繁特征提取
+现有一个英文文本A.txt，读取文本，并完成如下任务：
+1.统计给定的英文文本中提取Unique Words的个数；
+2.给出在文本中出现次数最多的十个单词；
+*不要求对词语进行词形还原
+输出结果的格式为：
+[num, word1, word2, ... , word10]
+
+----------------------------------------------------------------------------------------------------
+T5:
+关联规则挖掘
+现在有一份数据集A.csv，数据来自https://archive.ics.uci.edu/ml/datasets/Congressional+Voting+Records，
+每一行的第i项数据代表议员对第i个政策的投票结果记为ni或yi或？i，请根据数据集的描述（https://archive.ics.uci.edu/ml/machine-learning-databases/voting-records/house-votes-84.names），
+读取数据集提取出minimum_support为150时的频繁项集，然后求出此时支持度大于等于0.45，置信度大于等于0.9的，
+以包含republican0或democrat0为左边的关联规则。如：['y3', 'democrat0'] => ['n4']
+结果返回格式为：
+[[['democrat0'], ['n4']], [['y3', 'democrat0'], ['n4']], …… ]
+
+---------------------------------------------------------------------------
+T6:
+使用sklearn对数据集做逻辑回归预测，要求返回对测试数据的预测结果
+
+------------------------------------------------------------------------
+T7:
+使用sklearn对数据集分类，要求返回对测试数据的预测结果
+
+-----------------------------------------------------------------------------
+T8:
+﻿聚类问题：
+编写聚类函数solve(data)，数据集data为一个二维数组，其类别个数为12，即在聚类时，设置k为12。
+返回参数为数据集的类标签数组idx，idx为一维行向量。
+使用调和平均值v-measure对聚类结果进行评价，若v-measure值大于0.7，则证明聚类算法有效。
+
+数据格式：
+'FrogsMFCCs': array([[ 1.        ,  0.1529363 , -0.1055859 , ...,  0.05768398,
+         0.11868014,  0.01403845],
+       [ 1.        ,  0.17153426, -0.09897474, ...,  0.02013996,
+         0.08226299,  0.02905574],
+       [ 1.        ,  0.15231709, -0.08297267, ..., -0.02508323,
+         0.0991084 ,  0.07716238],
+       ...,
+       [ 1.        ,  0.25324917, -0.18068288, ..., -0.03053587,
+         0.07844945,  0.08050997],
+       [ 1.        ,  0.22105732, -0.11394731, ...,  0.03072397,
+         0.16392708,  0.11973469],
+       [ 1.        ,  0.15597953, -0.24736819, ..., -0.01421714,
+         0.1042441 ,  0.04346174]])
+
+-------------------------------------------------------------------------------------------
+
+T9:
+﻿推荐系统：
+同学们需要完成solve(R ,Y ,ratings ,k)函数，Y是包含1到5等级的（电影数量（行）*用户数量（列））二维数组。R是包含指示用户是否已经评级电影的二进制值的“指示”数组。两者具有相同的形状；ratings为传入的待推荐用户评分数据，其为一维列向量（电影数量（行）*1），每一个数字代表该用户在此电影上的评分；k为要返回的推荐列表中电影的个数。
+评分标准为，|output_id&standard_id|/k，output_id为返回的结果，standard_id为后台标准推荐id，当重合度>=0.3时，证明推荐有效。
+
+数据格式标准：
+'R': array([[1, 1, 0, ..., 1, 0, 0],
+        [1, 0, 0, ..., 0, 0, 1],
+        [1, 0, 0, ..., 0, 0, 0],
+        ...,
+        [0, 0, 0, ..., 0, 0, 0],
+        [0, 0, 0, ..., 0, 0, 0],
+        [0, 0, 0, ..., 0, 0, 0]], dtype=uint8),
+'Y': array([[5, 4, 0, ..., 5, 0, 0],
+        [3, 0, 0, ..., 0, 0, 5],
+        [4, 0, 0, ..., 0, 0, 0],
+        ...,
+        [0, 0, 0, ..., 0, 0, 0],
+        [0, 0, 0, ..., 0, 0, 0],
+        [0, 0, 0, ..., 0, 0, 0]], dtype=uint8),
